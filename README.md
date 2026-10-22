@@ -1,6 +1,6 @@
 # Skylearner Technology
 
-Website, admin panel and backend for Skylearner Technology Pvt Ltd.
+Website, admin panel and backend for Skylearner Technology.
 
 Skylearner runs practical tech training for schools and colleges: AI and Machine Learning, Robotics, Web Development and App Development. Sessions are taught by working engineers, students build real projects, and each student pays Rs 200 per month for live sessions, notes, hackathons, a monthly exam and a certificate.
 
