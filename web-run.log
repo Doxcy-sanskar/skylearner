@@ -1,0 +1,8 @@
+Serving HTTP on 0.0.0.0 port 8080 (http://0.0.0.0:8080/) ...
+127.0.0.1 - - [22/Oct/2026 12:43:36] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 12:43:37] "GET /admin.html HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 12:43:51] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 12:43:51] code 404, message File not found
+127.0.0.1 - - [22/Oct/2026 12:43:51] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [22/Oct/2026 12:43:58] "GET /admin.html HTTP/1.1" 200 -
+127.0.0.1 - - [22/Oct/2026 12:43:59] "GET /index.html HTTP/1.1" 200 -

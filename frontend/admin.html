@@ -54,8 +54,11 @@
 </main>
 
 <script>
-  // same backend address as the website
-  const API_BASE = "http://localhost:5000";
+  // backend address. same rule as the website:
+  // local computer uses localhost, live site uses the deployed backend
+  const LIVE_API = "https://YOUR-BACKEND-URL.onrender.com";
+  const isLocal = ["localhost", "127.0.0.1"].includes(location.hostname);
+  const API_BASE = isLocal ? "http://localhost:5000" : LIVE_API;
   const STATUSES = ["pending", "active", "paused", "completed"];
   const $ = (id) => document.getElementById(id);
   let adminKey = "";

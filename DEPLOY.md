@@ -27,6 +27,10 @@ Order: deploy the backend first, then point the frontend at it.
 
 ## 2. Deploy the backend on Render
 
+**Easiest way:** in Render, click **New > Blueprint**, select the repo, and Render reads `render.yaml`. It creates the service, the disk and the environment values. Then fill in `ADMIN_KEY` and `FRONTEND_URL` when Render asks.
+
+**Manual way (same result):**
+
 Render is simple for Node apps. Its free tier does **not** keep files between restarts, so use a paid instance that has a persistent disk (the Starter plan or higher).
 
 1. Go to render.com, sign in with GitHub, and click **New > Web Service**.
@@ -57,19 +61,15 @@ It should return `[]` on a fresh database.
 
 ## 3. Point the frontend at the backend
 
-Open `frontend/index.html` and `frontend/admin.html` in a text editor. Find this line in each file:
+Open `frontend/index.html` and `frontend/admin.html` in a text editor. In each file, find this line:
 
 ```js
-const API_BASE = "http://localhost:5000";
+const LIVE_API = "https://YOUR-BACKEND-URL.onrender.com";
 ```
 
-Change it to your live backend URL:
+Replace the URL with your live backend URL (the one Render gave you, e.g. `https://skylearner-api.onrender.com`). Do this in both files and save.
 
-```js
-const API_BASE = "https://<your-service>.onrender.com";
-```
-
-Do this in both files. Save them.
+On your own computer (`localhost`), the site automatically uses `http://localhost:5000`, so you do not need to change anything for local testing.
 
 ---
 
