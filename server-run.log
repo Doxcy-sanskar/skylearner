@@ -1,3 +1,0 @@
-(node:246) ExperimentalWarning: SQLite is an experimental feature and might change at any time
-(Use `node --trace-warnings ...` to show where the warning was created)
-skylearner backend listening on port 5000 (db: ./data/skylearner.db)
