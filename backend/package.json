@@ -1,0 +1,20 @@
+{
+  "name": "skylearner-backend",
+  "version": "0.2.0",
+  "description": "Backend for Skylearner Technology website (contact form, enrollments, admin)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}

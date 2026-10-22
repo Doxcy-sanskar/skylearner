@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Skylearner Admin</title>
+<style>
+  :root { --navy: #0b2d5b; --sky: #5aa9e0; --cream: #fdfaf3; --text: #1f2937; --muted: #5b6676; --line: #e3e9f2; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", Roboto, Arial, sans-serif; background: var(--cream); color: var(--text); }
+  header { background: var(--navy); color: #fff; padding: 16px 22px; }
+  header h1 { margin: 0; font-size: 20px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 22px; }
+  .login { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: #fff; padding: 18px; border-radius: 12px; box-shadow: 0 3px 14px rgba(11,45,91,0.07); }
+  input, select, button { font: inherit; padding: 9px 12px; border-radius: 8px; border: 1px solid #cbd5e1; }
+  button { background: var(--navy); color: #fff; border: 0; cursor: pointer; font-weight: 600; }
+  .card { background: #fff; border-radius: 12px; padding: 18px; margin-top: 20px; box-shadow: 0 3px 14px rgba(11,45,91,0.07); overflow-x: auto; }
+  h2 { color: var(--navy); margin: 0 0 12px; font-size: 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: #eef4fb; color: var(--navy); }
+  .muted { color: var(--muted); }
+  .err { color: #b42318; font-weight: 600; }
+  .ok { color: #16794a; font-weight: 600; }
+  .stats { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+  .stat { background: #fff; border-left: 4px solid var(--sky); padding: 10px 16px; border-radius: 10px; box-shadow: 0 3px 14px rgba(11,45,91,0.07); }
+  .stat b { display: block; font-size: 22px; color: var(--navy); }
+  .stat span { font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header><h1>Skylearner Admin</h1></header>
+
+<main>
+  <div class="login">
+    <input id="key" type="password" placeholder="Admin key">
+    <button id="loadBtn" type="button">Load data</button>
+    <span id="status" class="muted"></span>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="card">
+    <h2>Enrollments</h2>
+    <div id="enrollments" class="muted">Enter the admin key to see data.</div>
+  </div>
+
+  <div class="card">
+    <h2>Contact messages</h2>
+    <div id="contacts" class="muted"></div>
+  </div>
+</main>
+
+<script>
+  // same backend address as the website
+  const API_BASE = "http://localhost:5000";
+  const STATUSES = ["pending", "active", "paused", "completed"];
+  const $ = (id) => document.getElementById(id);
+  let adminKey = "";
+
+  function el(tag, text, cls) {
+    const n = document.createElement(tag);
+    if (text !== undefined) n.textContent = text;
+    if (cls) n.className = cls;
+    return n;
+  }
+
+  function setStatus(text, ok) {
+    $("status").textContent = text;
+    $("status").className = ok ? "ok" : "err";
+  }
+
+  async function api(path, opts) {
+    const options = opts || {};
+    const res = await fetch(API_BASE + path, {
+      method: options.method || "GET",
+      headers: { "Content-Type": "application/json", "x-admin-key": adminKey },
+      body: options.body
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || ("request failed with " + res.status));
+    return data;
+  }
+
+  async function load() {
+    adminKey = $("key").value.trim();
+    if (!adminKey) return;
+    setStatus("Loading...", true);
+    try {
+      const enrollments = await api("/api/admin/enrollments");
+      const contacts = await api("/api/admin/contacts");
+      setStatus("Loaded", true);
+      renderStats(enrollments, contacts);
+      renderEnrollments(enrollments);
+      renderContacts(contacts);
+    } catch (err) {
+      setStatus(err.message, false);
+    }
+  }
+
+  function renderStats(enrollments, contacts) {
+    const box = $("stats");
+    box.innerHTML = "";
+    const active = enrollments.filter((e) => e.status === "active").length;
+    const items = [
+      ["Total enrollments", enrollments.length],
+      ["Active students", active],
+      ["Monthly fee (active students)", "Rs " + (active * 200)],
+      ["Contact messages", contacts.length]
+    ];
+    items.forEach(([label, value]) => {
+      const card = el("div", undefined, "stat");
+      card.appendChild(el("b", String(value)));
+      card.appendChild(el("span", label));
+      box.appendChild(card);
+    });
+  }
+
+  function renderEnrollments(list) {
+    const box = $("enrollments");
+    box.innerHTML = "";
+    if (!list.length) {
+      box.textContent = "No enrollments yet.";
+      return;
+    }
+
+    const table = el("table");
+    const thead = el("thead");
+    const head = el("tr");
+    ["Student", "Phone", "Track", "Institution", "Joined", "Status"].forEach((h) => head.appendChild(el("th", h)));
+    thead.appendChild(head);
+    table.appendChild(thead);
+
+    const tbody = el("tbody");
+    list.slice().reverse().forEach((item) => {
+      const tr = el("tr");
+      tr.appendChild(el("td", item.studentName));
+      tr.appendChild(el("td", item.phone));
+      tr.appendChild(el("td", item.track));
+      tr.appendChild(el("td", item.institution || "-"));
+      tr.appendChild(el("td", new Date(item.createdAt).toLocaleDateString("en-IN")));
+
+      const td = el("td");
+      const sel = el("select");
+      STATUSES.forEach((s) => {
+        const opt = el("option", s);
+        opt.value = s;
+        if (s === item.status) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      sel.addEventListener("change", () => changeStatus(item.id, sel.value));
+      td.appendChild(sel);
+      tr.appendChild(td);
+
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    box.appendChild(table);
+  }
+
+  async function changeStatus(id, status) {
+    try {
+      await api("/api/admin/enrollments/" + encodeURIComponent(id), {
+        method: "PATCH",
+        body: JSON.stringify({ status: status })
+      });
+      setStatus("Status saved", true);
+    } catch (err) {
+      setStatus(err.message, false);
+    }
+  }
+
+  function renderContacts(list) {
+    const box = $("contacts");
+    box.innerHTML = "";
+    if (!list.length) {
+      box.textContent = "No messages yet.";
+      return;
+    }
+
+    const table = el("table");
+    const thead = el("thead");
+    const head = el("tr");
+    ["Name", "Contact", "Message", "Date"].forEach((h) => head.appendChild(el("th", h)));
+    thead.appendChild(head);
+    table.appendChild(thead);
+
+    const tbody = el("tbody");
+    list.slice().reverse().forEach((item) => {
+      const tr = el("tr");
+      tr.appendChild(el("td", item.name));
+
+      const contact = el("td", item.email);
+      if (item.phone) {
+        contact.appendChild(el("br"));
+        contact.appendChild(document.createTextNode(item.phone));
+      }
+      tr.appendChild(contact);
+
+      tr.appendChild(el("td", item.message));
+      tr.appendChild(el("td", new Date(item.createdAt).toLocaleDateString("en-IN")));
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    box.appendChild(table);
+  }
+
+  $("loadBtn").addEventListener("click", load);
+  $("key").addEventListener("keydown", (e) => { if (e.key === "Enter") load(); });
+</script>
+</body>
+</html>
